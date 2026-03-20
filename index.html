@@ -91,6 +91,20 @@
         return "TUBBY-" + hashHex.substring(0, 10).toUpperCase();
     }
 
+    // Automatically read invisible HWID from Linkvertise Dynamic Link!
+    const urlParams = new URLSearchParams(window.location.search);
+    const hiddenHwid = urlParams.get('hwid');
+
+    if (hiddenHwid) {
+        // If HWID is in the URL, hide the manual paste stuff and do it instantly!
+        document.getElementById("hwidInput").value = hiddenHwid;
+        document.getElementById("hwidInput").style.display = "none";
+        document.getElementById("generateBtn").style.display = "none";
+        document.querySelector("p").innerText = "Ads complete! Your Daily HWID-Locked Key is generated below.";
+        
+        generateKey();
+    }
+
     async function generateKey() {
         const hwid = document.getElementById("hwidInput").value.trim();
         
