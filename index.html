@@ -84,6 +84,16 @@
     }
 
     async function generateKey() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const hwid = urlParams.get('hwid');
+
+        if (!hwid) {
+            document.getElementById("keyDisplay").innerText = "Error: Please open this page from the TubbyMacro App!";
+            document.getElementById("keyDisplay").style.color = "#FF5252";
+            document.getElementById("keyDisplay").style.fontSize = "16px";
+            return;
+        }
+
         // Calculate the exact same 4-hour window as C#
         const jsDateMillis = BigInt(Date.now());
         const ticksPerMillisecond = 10000n;
@@ -94,10 +104,10 @@
         // TimeSpan.FromHours(4).Ticks = 144000000000
         const windowTicks = 144000000000n;
         
-        // BigInt division truncates decimals, just like integer division in C#
         const currentWindow = currentTicks / windowTicks; 
         
-        const raw = "TubbySecretKey" + currentWindow.toString();
+        // Add the hwid to the hash!
+        const raw = "TubbySecretKey" + currentWindow.toString() + hwid;
         const key = await digestMessage(raw);
         
         document.getElementById("keyDisplay").innerText = key;
