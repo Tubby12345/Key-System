@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tubby Key System</title>
+    <style>
+        body {
+            background-color: #0b050f;
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+        .container {
+            background-color: #10091A;
+            border: 1px solid #1D122D;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+            max-width: 400px;
+            width: 100%;
+        }
+        h1 {
+            color: #9B2BFF;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        .key-box {
+            background-color: #1F1332;
+            border: 1px solid #2D1C48;
+            padding: 15px;
+            font-size: 20px;
+            border-radius: 8px;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            word-break: break-all;
+            color: #E0DCE6;
+        }
+        .copy-btn {
+            background-color: #9B2BFF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            width: 100%;
+            font-weight: bold;
+        }
+        .copy-btn:hover {
+            background-color: #7120BA;
+        }
+        p {
+            color: #8A7E9C;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Tubby Key System</h1>
+    <p>Your 4-hour valid key is generated below.</p>
+    
+    <div class="key-box" id="keyDisplay">Loading key...</div>
+    
+    <button class="copy-btn" onclick="copyKey()" id="copyBtn">Copy Key</button>
+</div>
+
+<script>
+    // SHA-256 implementation
+    async function digestMessage(message) {
+        const msgUint8 = new TextEncoder().encode(message);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+        return hashHex.substring(0, 16);
+    }
+
+    async function generateKey() {
+        // Calculate the exact same 4-hour window as C#
+        const jsDateMillis = BigInt(Date.now());
+        const ticksPerMillisecond = 10000n;
+        const unixEpochTicks = 621355968000000000n; // Ticks from 0001-01-01 to 1970-01-01
+        
+        const currentTicks = (jsDateMillis * ticksPerMillisecond) + unixEpochTicks;
+        
+        // TimeSpan.FromHours(4).Ticks = 144000000000
+        const windowTicks = 144000000000n;
+        
+        // BigInt division truncates decimals, just like integer division in C#
+        const currentWindow = currentTicks / windowTicks; 
+        
+        const raw = "TubbySecretKey" + currentWindow.toString();
+        const key = await digestMessage(raw);
+        
+        document.getElementById("keyDisplay").innerText = key;
+    }
+
+    function copyKey() {
+        const key = document.getElementById("keyDisplay").innerText;
+        navigator.clipboard.writeText(key).then(() => {
+            const btn = document.getElementById("copyBtn");
+            btn.innerText = "Copied!";
+            btn.style.backgroundColor = "#4CAF50";
+            setTimeout(() => {
+                btn.innerText = "Copy Key";
+                btn.style.backgroundColor = "#9B2BFF";
+            }, 2000);
+        });
+    }
+
+    // Generate on load
+    generateKey();
+</script>
+
+</body>
+</html>
