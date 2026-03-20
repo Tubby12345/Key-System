@@ -66,51 +66,48 @@
 
 <div class="container">
     <h1>Tubby Key System</h1>
-    <p>Your 4-hour valid key is generated below.</p>
+    <p style="margin-bottom: 20px;">Paste your HWID below to get your Daily HWID-Locked Key!</p>
     
-    <div class="key-box" id="keyDisplay">Loading key...</div>
+    <input type="text" id="hwidInput" class="hwid-input" placeholder="Paste HWID here (Ctrl+V)" style="width: 100%; padding: 12px; margin-bottom: 20px; box-sizing: border-box; border-radius: 6px; border: 1px solid #9B2BFF; background: #1F1332; color: white; font-size: 16px; text-align: center;">
     
-    <button class="copy-btn" onclick="copyKey()" id="copyBtn">Copy Key</button>
+    <button class="copy-btn" onclick="generateKey()" id="generateBtn" style="margin-bottom: 20px;">Generate Key</button>
+    
+    <div class="key-box" id="keyDisplay" style="display: none;">Your key will appear here.</div>
+    
+    <button class="copy-btn" onclick="copyKey()" id="copyBtn" style="display: none;">Copy Key</button>
 </div>
 
 <script>
-    // SHA-256 implementation
-    async function digestMessage(message) {
+    async function getDailyKey(hwid) {
+        // Matches C# string exactly
+        const date = new Date().toISOString().split('T')[0];
+        const message = hwid + date + "TubbyAdsSecret123!";
+        
         const msgUint8 = new TextEncoder().encode(message);
         const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
         const hashArray = Array.from(new Uint8Array(hashBuffer));
-        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
-        return hashHex.substring(0, 16);
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        
+        return "TUBBY-" + hashHex.substring(0, 10).toUpperCase();
     }
 
     async function generateKey() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const hwid = urlParams.get('hwid');
-
-        if (!hwid) {
-            document.getElementById("keyDisplay").innerText = "Error: Please open this page from the TubbyMacro App!";
+        const hwid = document.getElementById("hwidInput").value.trim();
+        
+        if (!hwid || hwid.length < 5) {
+            document.getElementById("keyDisplay").innerText = "Please paste a valid HWID first!";
             document.getElementById("keyDisplay").style.color = "#FF5252";
-            document.getElementById("keyDisplay").style.fontSize = "16px";
+            document.getElementById("keyDisplay").style.display = "block";
             return;
         }
 
-        // Calculate the exact same 4-hour window as C#
-        const jsDateMillis = BigInt(Date.now());
-        const ticksPerMillisecond = 10000n;
-        const unixEpochTicks = 621355968000000000n; // Ticks from 0001-01-01 to 1970-01-01
+        const key = await getDailyKey(hwid);
         
-        const currentTicks = (jsDateMillis * ticksPerMillisecond) + unixEpochTicks;
-        
-        // TimeSpan.FromHours(4).Ticks = 144000000000
-        const windowTicks = 144000000000n;
-        
-        const currentWindow = currentTicks / windowTicks; 
-        
-        // Add the hwid to the hash!
-        const raw = "TubbySecretKey" + currentWindow.toString() + hwid;
-        const key = await digestMessage(raw);
-        
-        document.getElementById("keyDisplay").innerText = key;
+        const display = document.getElementById("keyDisplay");
+        display.innerText = key;
+        display.style.color = "#E0DCE6";
+        display.style.display = "block";
+        document.getElementById("copyBtn").style.display = "block";
     }
 
     function copyKey() {
@@ -125,9 +122,6 @@
             }, 2000);
         });
     }
-
-    // Generate on load
-    generateKey();
 </script>
 
 </body>
