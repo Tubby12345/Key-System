@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tubby Admin Panel</title>
+    <title>Tubby Management - Firebase Tracker</title>
     <!-- Modern premium font -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Lucide icons -->
@@ -13,15 +13,13 @@
             --bg-color: #09090b;
             --surface: rgba(24, 24, 27, 0.6);
             --surface-glass: rgba(39, 39, 42, 0.4);
-            --primary: #9333ea;
-            --primary-hover: #7e22ce;
+            --primary: #3b82f6; /* Changed to Blue to match modern DB trackers */
+            --primary-hover: #2563eb;
             --danger: #e11d48;
-            --danger-hover: #be123c;
             --success: #10b981;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --border-color: rgba(255, 255, 255, 0.08);
-            --border-highlight: rgba(147, 51, 234, 0.5);
             --radius-lg: 16px;
             --radius-md: 10px;
         }
@@ -41,17 +39,15 @@
             justify-content: center;
             align-items: flex-start;
             padding: 40px 20px;
-            /* Cool subtle background gradient */
             background-image: 
-                radial-gradient(circle at 15% 50%, rgba(147, 51, 234, 0.08) 0%, transparent 40%),
-                radial-gradient(circle at 85% 30%, rgba(37, 99, 235, 0.08) 0%, transparent 40%);
+                radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 85% 30%, rgba(147, 51, 234, 0.08) 0%, transparent 40%);
             background-attachment: fixed;
         }
 
         .container {
             width: 100%;
-            max-width: 900px;
-            display: none; /* hidden until auth */
+            max-width: 1100px;
             animation: fadeIn 0.4s ease-out;
         }
 
@@ -79,29 +75,18 @@
         .brand-icon {
             width: 44px;
             height: 44px;
-            background: linear-gradient(135deg, #9333ea, #3b82f6);
+            background: linear-gradient(135deg, #3b82f6, #9333ea);
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 20px rgba(147, 51, 234, 0.4);
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
         }
 
-        .brand-text h1 {
-            font-size: 24px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-        }
+        .brand-text h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
+        .brand-text p { font-size: 13px; color: var(--text-muted); }
 
-        .brand-text p {
-            font-size: 13px;
-            color: var(--text-muted);
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 12px;
-        }
+        .header-actions { display: flex; gap: 12px; }
 
         /* BUTTONS */
         .btn {
@@ -122,10 +107,10 @@
         .btn:active { transform: scale(0.96); }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary), #6b21a8);
-            box-shadow: 0 4px 15px rgba(147, 51, 234, 0.3);
+            background: linear-gradient(135deg, var(--primary), #1d4ed8);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
         }
-        .btn-primary:hover { opacity: 0.9; box-shadow: 0 6px 20px rgba(147, 51, 234, 0.4); }
+        .btn-primary:hover { opacity: 0.9; box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4); }
 
         .btn-outline {
             background: rgba(255, 255, 255, 0.03);
@@ -135,17 +120,35 @@
 
         .btn-danger { background-color: rgba(225, 29, 72, 0.1); color: var(--danger); border: 1px solid rgba(225, 29, 72, 0.2); }
         .btn-danger:hover { background-color: var(--danger); color: white; }
+        
+        .btn-success { background-color: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.2); }
+        .btn-success:hover { background-color: var(--success); color: white; }
 
-        .btn-icon-only { padding: 8px; border-radius: 8px; }
-
-        /* MULTI-COLUMN LAYOUT */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
+        /* TABS */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.03);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: 600;
+            border: 1px solid transparent;
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+        .tab:hover { background: rgba(255,255,255,0.08); }
+        .tab.active {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--primary);
+            border-color: rgba(59, 130, 246, 0.3);
         }
 
-        /* CARDS */
+        /* DATA CARDS & GRIDS */
         .card {
             background: var(--surface);
             backdrop-filter: blur(12px);
@@ -153,49 +156,21 @@
             border: 1px solid var(--border-color);
             border-radius: var(--radius-lg);
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
+            display: none; /* hidden by default, handled by JS tabs */
         }
+        .card.active { display: block; animation: fadeIn 0.3s; }
 
-        .card-header {
+        .toolbar {
             padding: 20px;
             border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
             background: rgba(0, 0, 0, 0.2);
-        }
-
-        .card-title {
-            font-size: 16px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .badge {
-            background: rgba(255,255,255,0.1);
-            padding: 2px 8px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .card-body {
-            padding: 20px;
-            flex-grow: 1;
-        }
-
-        /* FORMS */
-        .input-group {
-            display: flex;
             gap: 10px;
-            margin-bottom: 20px;
         }
 
         .input-box {
-            flex-grow: 1;
             background: rgba(0, 0, 0, 0.3);
             border: 1px solid var(--border-color);
             padding: 12px 16px;
@@ -204,398 +179,346 @@
             font-size: 14px;
             outline: none;
             transition: border 0.2s;
+            width: 300px;
         }
         .input-box:focus { border-color: var(--primary); }
 
-        /* LISTS */
-        .entry-list {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            max-height: 400px;
-            overflow-y: auto;
-            padding-right: 5px;
+        /* TABLE STYLES */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
         }
-
-        .entry-list::-webkit-scrollbar { width: 6px; }
-        .entry-list::-webkit-scrollbar-track { background: transparent; }
-        .entry-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-
-        .entry-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--surface-glass);
-            border: 1px solid transparent;
-            padding: 12px 16px;
-            border-radius: var(--radius-md);
-            transition: all 0.2s;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
         }
-        .entry-item:hover {
-            border-color: rgba(255, 255, 255, 0.05);
-            background: rgba(255, 255, 255, 0.03);
-            transform: translateX(2px);
+        th, td {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
         }
-
-        .entry-text {
-            font-family: monospace;
+        th {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            font-weight: 600;
+            background: rgba(255,255,255,0.02);
+        }
+        td {
             font-size: 14px;
-            color: #e2e8f0;
-            word-break: break-all;
-            padding-right: 15px;
+            white-space: nowrap;
         }
-
-        /* LOGIN OVERLAY */
-        #authOverlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-        }
+        tr:last-child td { border-bottom: none; }
         
-        .auth-card {
-            background: var(--bg-color);
-            border: 1px solid var(--border-highlight);
-            box-shadow: 0 10px 40px rgba(147, 51, 234, 0.2);
-            padding: 40px;
-            border-radius: var(--radius-lg);
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
+        .row-hover:hover {
+            background: rgba(255,255,255,0.02);
         }
 
-        .auth-card h2 { margin-bottom: 25px; }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .status-active { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.2); }
+        .status-expired { background: rgba(225, 29, 72, 0.15); color: #fb7185; border: 1px solid rgba(225, 29, 72, 0.2); }
+        .status-lifetime { background: rgba(147, 51, 234, 0.15); color: #c084fc; border: 1px solid rgba(147, 51, 234, 0.2); }
 
-        .auth-card .input-box {
-            width: 100%;
-            margin-bottom: 15px;
-            text-align: center;
+        .key-text {
+            font-family: monospace;
+            color: #e2e8f0;
+            background: rgba(0,0,0,0.3);
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
         }
 
-        /* RESPONSIVE (MOBILE) */
-        @media (max-width: 768px) {
-            .dashboard-grid { grid-template-columns: 1fr; }
-            header { flex-direction: column; gap: 15px; align-items: flex-start; }
-            .header-actions { width: 100%; justify-content: space-between; }
-            .btn { flex-grow: 1; justify-content: center; }
+        .action-cell {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
         }
     </style>
 </head>
 <body>
 
-    <!-- AUTHENTICATION OVERLAY -->
-    <div id="authOverlay">
-        <div class="auth-card">
-            <div class="brand-icon" style="margin: 0 auto 20px auto;">
-                <i data-lucide="lock" style="color: white; width: 24px; height: 24px;"></i>
-            </div>
-            <h2>Admin Login</h2>
-            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">
-                Securely connects to GitHub using your personal access token. Data is only stored on your local device.
-            </p>
-            
-            <input type="password" id="ghTokenInput" class="input-box" placeholder="GitHub PAT (ghp_...)">
-            <input type="text" id="gistIdInput" class="input-box" placeholder="Gist ID (e.g. 5f2a1b...)">
-            
-            <button class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 10px;" onclick="saveAuth()">
-                Connect to Dashboard
-            </button>
-        </div>
-    </div>
-
-    <!-- MAIN DASHBOARD -->
-    <div class="container" id="dashboardContainer">
+    <div class="container">
         <header>
             <div class="brand">
                 <div class="brand-icon">
-                    <i data-lucide="shield" style="color: white; width: 24px; height: 24px;"></i>
+                    <i data-lucide="database" style="color: white; width: 24px; height: 24px;"></i>
                 </div>
                 <div class="brand-text">
                     <h1>Tubby Management</h1>
-                    <p id="statusText">Connected to GitHub Gist</p>
+                    <p id="statusText"><span style="color: var(--success)">●</span> Live - Connected to Firebase</p>
                 </div>
             </div>
             <div class="header-actions">
-                <button class="btn btn-primary" id="syncBtn" onclick="syncToCloud()">
-                    <i data-lucide="cloud-upload" style="width: 18px; height: 18px;"></i>
-                    <span id="syncText">Push Changes to Cloud</span>
-                </button>
-                <button class="btn btn-outline btn-icon-only" onclick="logout()" title="Logout">
-                    <i data-lucide="log-out" style="width: 18px; height: 18px; color: var(--text-muted);"></i>
+                <button class="btn btn-outline" onclick="fetchData()">
+                    <i data-lucide="refresh-cw" style="width: 16px; height: 16px;"></i> Refresh
                 </button>
             </div>
         </header>
 
-        <div class="dashboard-grid">
-            
-            <!-- BANNED HWIDS CARD -->
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">
-                        <i data-lucide="ban" style="color: var(--danger); width: 18px; height: 18px;"></i>
-                        Banned Hardware
-                    </div>
-                    <span class="badge" id="banCount">0</span>
-                </div>
-                <div class="card-body">
-                    <div class="input-group">
-                        <input type="text" id="newBanInput" class="input-box" placeholder="Paste HWID to ban...">
-                        <button class="btn btn-outline" style="color: var(--danger); border-color: rgba(225,29,72,0.3);" onclick="addBan()">Ban</button>
-                    </div>
-                    <ul class="entry-list" id="banListUI">
-                        <!-- Populated by JS -->
-                    </ul>
-                </div>
-            </div>
-
-            <!-- LIFETIME KEYS CARD -->
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">
-                        <i data-lucide="key" style="color: var(--success); width: 18px; height: 18px;"></i>
-                        Custom Licenses
-                    </div>
-                    <span class="badge" id="keyCount">0</span>
-                </div>
-                <div class="card-body">
-                    <div class="input-group">
-                        <input type="text" id="newKeyInput" class="input-box" placeholder="Custom Key (e.g. VIP-123)">
-                        <button class="btn btn-outline" style="color: var(--success); border-color: rgba(16,185,129,0.3);" onclick="addKey()">Create</button>
-                    </div>
-                    <ul class="entry-list" id="keyListUI">
-                        <!-- Populated by JS -->
-                    </ul>
-                </div>
-            </div>
-
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('keys')" id="tab-keys">Licenses & Users</div>
+            <div class="tab" onclick="switchTab('bans')" id="tab-bans">Banned Hardware</div>
         </div>
+
+        <!-- KEYS TAB -->
+        <div class="card active" id="view-keys">
+            <div class="toolbar">
+                <div style="display:flex; gap: 10px;">
+                    <input type="text" id="newKeyInput" class="input-box" placeholder="Custom Key Name (e.g. TUBBY-VIP-1)">
+                    <button class="btn btn-primary" onclick="createCustomKey()">Create Lifetime License</button>
+                </div>
+                <span style="color: var(--text-muted); font-size: 14px;">Total: <strong id="totalKeys" style="color:white">0</strong></span>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>License Key</th>
+                            <th>Status / Type</th>
+                            <th>Target HWID</th>
+                            <th>Generated On</th>
+                            <th>Expires On</th>
+                            <th>Last Login</th>
+                            <th style="text-align: right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="keysTableBody">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- BANS TAB -->
+        <div class="card" id="view-bans">
+            <div class="toolbar">
+                <div style="display:flex; gap: 10px;">
+                    <input type="text" id="newBanInput" class="input-box" placeholder="Paste HWID to ban...">
+                    <button class="btn btn-danger" onclick="banHardware()">Ban Hardware</button>
+                </div>
+                <span style="color: var(--text-muted); font-size: 14px;">Total Bans: <strong id="totalBans" style="color:white">0</strong></span>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Hardware ID (HWID)</th>
+                            <th>Ban Reason</th>
+                            <th>Banned On</th>
+                            <th style="text-align: right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bansTableBody">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
 
     <script>
-        // Initialize lucide icons
+        // Init Icons
         lucide.createIcons();
 
-        // State
-        let ghToken = localStorage.getItem('tubby_admin_token') || '';
-        let gistId = localStorage.getItem('tubby_admin_gist') || '';
-        
-        // Data arrays
-        let bannedHWIDs = [];
-        let customKeys = [];
+        // Database Configuration
+        const DB_URL = "https://tbdb-3562a-default-rtdb.asia-southeast1.firebasedatabase.app";
 
-        // Elements
-        const authOverlay = document.getElementById('authOverlay');
-        const dashboardContainer = document.getElementById('dashboardContainer');
-        const banListUI = document.getElementById('banListUI');
-        const keyListUI = document.getElementById('keyListUI');
-        
-        // Check Auth on load
-        if (ghToken && gistId) {
-            authOverlay.style.display = 'none';
-            dashboardContainer.style.display = 'block';
-            fetchRemoteData();
-        } else {
-            // Wait for user payload
+        let dbKeys = {};
+        let dbBans = {};
+
+        // Run on load
+        fetchData();
+        // Auto-refresh every 30 seconds
+        setInterval(fetchData, 30000);
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+            
+            document.getElementById(`tab-${tab}`).classList.add('active');
+            document.getElementById(`view-${tab}`).classList.add('active');
         }
 
-        function saveAuth() {
-            const tokenIn = document.getElementById('ghTokenInput').value.trim();
-            const gistIn = document.getElementById('gistIdInput').value.trim();
-            if (tokenIn && gistIn) {
-                localStorage.setItem('tubby_admin_token', tokenIn);
-                localStorage.setItem('tubby_admin_gist', gistIn);
-                ghToken = tokenIn; gistId = gistIn;
-                
-                authOverlay.style.display = 'none';
-                dashboardContainer.style.display = 'block';
-                fetchRemoteData();
-            } else {
-                alert("Please enter both Token and Gist ID");
-            }
-        }
-
-        function logout() {
-            localStorage.removeItem('tubby_admin_token');
-            localStorage.removeItem('tubby_admin_gist');
-            location.reload();
-        }
-
-        // ================= API OPERATIONS =================
-
-        async function fetchRemoteData() {
-            const statusText = document.getElementById('statusText');
-            statusText.innerText = "Fetching data from GitHub...";
-            statusText.style.color = "var(--text-muted)";
-
+        async function fetchData() {
             try {
-                const response = await fetch(`https://api.github.com/gists/${gistId}`, {
-                    headers: { 'Authorization': `token ${ghToken}` }
-                });
-
-                if (!response.ok) throw new Error("GitHub Auth Failed! Check Token/Gist ID.");
-
-                const data = await response.json();
+                const icon = document.querySelector('header .lucide-refresh-cw');
+                if(icon) icon.style.transform = "rotate(180deg)"; // tiny spin anim trigger
                 
-                // Assuming the Gist has a file named tubby_rules.txt (or fallback to the first file)
-                let rulesContent = "";
-                const files = Object.values(data.files);
-                if (files.length > 0) rulesContent = files[0].content;
+                const [keysRes, bansRes] = await Promise.all([
+                    fetch(`${DB_URL}/keys.json`),
+                    fetch(`${DB_URL}/bans.json`)
+                ]);
 
-                parseRules(rulesContent);
-                renderLists();
+                dbKeys = await keysRes.json() || {};
+                dbBans = await bansRes.json() || {};
+
+                renderKeys();
+                renderBans();
+
+                if(icon) setTimeout(() => icon.style.transform = "", 300);
+            } catch (err) {
+                alert("Error connecting to Firebase: " + err.message);
+            }
+        }
+
+        // ================= KEYS MANANGEMENT ================= //
+
+        function formatTime(unixSeconds) {
+            if (!unixSeconds || unixSeconds === 0) return "Never";
+            const date = new Date(unixSeconds * 1000);
+            return date.toLocaleString();
+        }
+
+        function renderKeys() {
+            const tbody = document.getElementById('keysTableBody');
+            tbody.innerHTML = "";
+            let count = 0;
+            const now = Math.floor(Date.now() / 1000);
+
+            // Sort so newest are top
+            const entries = Object.entries(dbKeys).sort((a,b) => (b[1].createdAt || 0) - (a[1].createdAt || 0));
+
+            for(const [keyName, data] of entries) {
+                count++;
                 
-                statusText.innerText = "Live - Connected to GitHub";
-                statusText.style.color = "var(--success)";
+                let isLifetime = data.type === 'Lifetime';
+                let isExpired = !isLifetime && data.expiresAt > 0 && data.expiresAt < now;
+                
+                let statusHtml = "";
+                if (isLifetime) statusHtml = `<div class="status-badge status-lifetime"><i data-lucide="award" style="width:12px;height:12px"></i> Lifetime</div>`;
+                else if (isExpired) statusHtml = `<div class="status-badge status-expired"><i data-lucide="clock" style="width:12px;height:12px"></i> Expired</div>`;
+                else statusHtml = `<div class="status-badge status-active"><i data-lucide="check-circle-2" style="width:12px;height:12px"></i> Active (4h)</div>`;
 
-            } catch (err) {
-                statusText.innerText = "Error: " + err.message;
-                statusText.style.color = "var(--danger)";
-                setTimeout(logout, 3000); // Kick to login if token is dead
-            }
-        }
-
-        async function syncToCloud() {
-            const syncBtn = document.getElementById('syncBtn');
-            const syncText = document.getElementById('syncText');
-            
-            syncBtn.style.opacity = "0.7";
-            syncText.innerText = "Pushing...";
-
-            // Rebuild string
-            let newContent = "";
-            bannedHWIDs.forEach(h => newContent += `BANNED: ${h}\n`);
-            customKeys.forEach(k => newContent += `CUSTOM: ${k}\n`);
-
-            if (newContent === "") newContent = "// Empty rules\n"; // Gists can't be purely empty easily
-
-            try {
-                // Get the actual filename existing on the gist to update it properly
-                const getResp = await fetch(`https://api.github.com/gists/${gistId}`, {
-                    headers: { 'Authorization': `token ${ghToken}` }
-                });
-                const data = await getResp.json();
-                const filename = Object.keys(data.files)[0]; // Just use whatever the first file is named
-
-                const patchPayload = {
-                    files: {
-                        [filename]: { content: newContent }
-                    }
-                };
-
-                const patchResp = await fetch(`https://api.github.com/gists/${gistId}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Authorization': `token ${ghToken}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    },
-                    body: JSON.stringify(patchPayload)
-                });
-
-                if (patchResp.ok) {
-                    syncText.innerText = "Synced Successfully!";
-                    syncBtn.style.background = "var(--success)";
-                    setTimeout(() => {
-                        syncBtn.style.background = "";
-                        syncText.innerText = "Push Changes to Cloud";
-                    }, 2000);
-                } else {
-                    throw new Error("Failed to patch Gist");
-                }
-            } catch (err) {
-                alert("Error pushing to cloud: " + err.message);
-                syncText.innerText = "Sync Failed";
-                syncBtn.style.background = "var(--danger)";
-            }
-            
-            syncBtn.style.opacity = "1";
-        }
-
-        // ================= LOGIC & UI =================
-
-        function parseRules(text) {
-            bannedHWIDs = [];
-            customKeys = [];
-            
-            const lines = text.split('\n');
-            for(let line of lines) {
-                line = line.trim();
-                if (line.startsWith("BANNED:")) {
-                    bannedHWIDs.push(line.replace("BANNED:", "").trim());
-                } else if (line.startsWith("CUSTOM:")) {
-                    customKeys.push(line.replace("CUSTOM:", "").trim());
-                }
-            }
-        }
-
-        function renderLists() {
-            // Update Counts
-            document.getElementById('banCount').innerText = bannedHWIDs.length;
-            document.getElementById('keyCount').innerText = customKeys.length;
-
-            // Render Bans
-            banListUI.innerHTML = "";
-            bannedHWIDs.forEach((hwid, idx) => {
-                banListUI.innerHTML += `
-                    <li class="entry-item">
-                        <span class="entry-text">${hwid}</span>
-                        <button class="btn btn-danger btn-icon-only" onclick="removeBan(${idx})" title="Unban">
-                            <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
-                        </button>
-                    </li>
+                tbody.innerHTML += `
+                    <tr class="row-hover">
+                        <td><span class="key-text">${keyName}</span></td>
+                        <td>${statusHtml}</td>
+                        <td style="font-family:monospace; color:var(--text-muted);">${data.hwid || 'Any'}</td>
+                        <td>${formatTime(data.createdAt)}</td>
+                        <td>${isLifetime ? '∞' : formatTime(data.expiresAt)}</td>
+                        <td>${formatTime(data.lastLogin)}</td>
+                        <td class="action-cell">
+                            ${(!isLifetime && !isExpired) ? `
+                                <button class="btn btn-outline" style="padding: 6px 12px; font-size:12px;" onclick="extendKey('${keyName}', ${data.expiresAt})" title="Add 2 Hours">
+                                    <i data-lucide="clock-4" style="width: 14px; height: 14px;"></i> Extend
+                                </button>
+                            ` : ''}
+                            <button class="btn btn-danger" style="padding: 6px 12px;" onclick="deleteKey('${keyName}')" title="Delete">
+                                <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                            </button>
+                        </td>
+                    </tr>
                 `;
-            });
-
-            // Render Keys
-            keyListUI.innerHTML = "";
-            customKeys.forEach((k, idx) => {
-                keyListUI.innerHTML += `
-                    <li class="entry-item">
-                        <span class="entry-text">${k}</span>
-                        <button class="btn btn-outline btn-icon-only" style="color:var(--danger); border-color: rgba(225,29,72,0.2)" onclick="removeKey(${idx})" title="Delete Key">
-                            <i data-lucide="x" style="width: 14px; height: 14px;"></i>
-                        </button>
-                    </li>
-                `;
-            });
-
-            lucide.createIcons(); // re-init icons for dynamic elements
-        }
-
-        function addBan() {
-            const input = document.getElementById('newBanInput');
-            const val = input.value.trim();
-            if (val && !bannedHWIDs.includes(val)) {
-                bannedHWIDs.push(val);
-                input.value = "";
-                renderLists();
             }
+
+            document.getElementById('totalKeys').innerText = count;
+            lucide.createIcons();
         }
 
-        function removeBan(idx) {
-            bannedHWIDs.splice(idx, 1);
-            renderLists();
-        }
-
-        function addKey() {
+        async function createCustomKey() {
             const input = document.getElementById('newKeyInput');
-            const val = input.value.trim();
-            if (val && !customKeys.includes(val)) {
-                customKeys.push(val);
-                input.value = "";
-                renderLists();
+            const keyName = input.value.trim();
+            if(!keyName) return;
+
+            const payload = {
+                type: "Lifetime",
+                hwid: "Any",
+                createdAt: Math.floor(Date.now() / 1000),
+                expiresAt: 0,
+                lastLogin: 0
+            };
+
+            await fetch(`${DB_URL}/keys/${keyName}.json`, {
+                method: 'PUT',
+                body: JSON.stringify(payload)
+            });
+
+            input.value = "";
+            fetchData();
+        }
+
+        async function deleteKey(keyName) {
+            if(confirm(`Are you sure you want to delete ${keyName}? They will be logged out eventually.`)) {
+                await fetch(`${DB_URL}/keys/${keyName}.json`, { method: 'DELETE' });
+                fetchData();
             }
         }
 
-        function removeKey(idx) {
-            customKeys.splice(idx, 1);
-            renderLists();
+        async function extendKey(keyName, currentExpiry) {
+            const additionalSeconds = 7200; // 2 hours
+            const newExpiry = currentExpiry + additionalSeconds;
+            await fetch(`${DB_URL}/keys/${keyName}.json`, {
+                method: 'PATCH',
+                body: JSON.stringify({ expiresAt: newExpiry })
+            });
+            fetchData();
         }
 
+        // ================= BANS MANANGEMENT ================= //
+
+        function renderBans() {
+            const tbody = document.getElementById('bansTableBody');
+            tbody.innerHTML = "";
+            let count = 0;
+
+            // Sort
+            const entries = Object.entries(dbBans).sort((a,b) => (b[1].timestamp || 0) - (a[1].timestamp || 0));
+
+            for(const [hwid, data] of entries) {
+                count++;
+                tbody.innerHTML += `
+                    <tr class="row-hover">
+                        <td><span class="key-text">${hwid}</span></td>
+                        <td>${data.reason || 'Admin Ban'}</td>
+                        <td>${formatTime(data.timestamp)}</td>
+                        <td class="action-cell">
+                            <button class="btn btn-outline" style="color:var(--success); border-color: rgba(16,185,129,0.3); padding: 6px 12px; font-size:12px;" onclick="unbanHardware('${hwid}')">
+                                <i data-lucide="shield-check" style="width: 14px; height: 14px;"></i> Unban
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }
+
+            document.getElementById('totalBans').innerText = count;
+            lucide.createIcons();
+        }
+
+        async function banHardware() {
+            const input = document.getElementById('newBanInput');
+            const hwid = input.value.trim();
+            if(!hwid) return;
+
+            const payload = {
+                reason: "Manual Dashboard Ban",
+                timestamp: Math.floor(Date.now() / 1000)
+            };
+
+            await fetch(`${DB_URL}/bans/${hwid}.json`, {
+                method: 'PUT',
+                body: JSON.stringify(payload)
+            });
+
+            input.value = "";
+            fetchData();
+        }
+
+        async function unbanHardware(hwid) {
+            if(confirm(`Remove ban for ${hwid}?`)) {
+                await fetch(`${DB_URL}/bans/${hwid}.json`, { method: 'DELETE' });
+                fetchData();
+            }
+        }
     </script>
 </body>
 </html>
