@@ -1,142 +1,323 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tubby Key System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
         body {
-            background-color: #0b050f;
+            background-color: #050505;
             color: white;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
-            text-align: center;
+            min-height: 100vh;
         }
-        .container {
-            background-color: #10091A;
-            border: 1px solid #1D122D;
-            border-radius: 12px;
-            padding: 40px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
-            max-width: 400px;
-            width: 100%;
-        }
-        h1 {
-            color: #9B2BFF;
-            margin-bottom: 30px;
-            font-size: 28px;
-        }
-        .key-box {
-            background-color: #1F1332;
-            border: 1px solid #2D1C48;
-            padding: 15px;
-            font-size: 20px;
-            border-radius: 8px;
-            letter-spacing: 2px;
-            margin-bottom: 20px;
-            word-break: break-all;
-            color: #E0DCE6;
-        }
-        .copy-btn {
-            background-color: #9B2BFF;
-            color: white;
-            border: none;
+
+        .alert-banner {
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            background-color: rgba(255, 193, 7, 0.05);
+            color: #ffc107;
             padding: 10px 20px;
-            font-size: 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background-color 0.2s;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .card {
+            background-color: #0a0a0a;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 40px 30px;
+            max-width: 450px;
             width: 100%;
-            font-weight: bold;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
         }
-        .copy-btn:hover {
-            background-color: #7120BA;
+
+        h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 15px;
         }
-        p {
-            color: #8A7E9C;
+
+        .subtitle {
             font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 15px;
+            color: #e0e0e0;
+        }
+
+        p {
+            color: #888;
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            margin-bottom: 12px;
+            transition: opacity 0.2s, transform 0.1s;
+            text-decoration: none;
+            color: white;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-linkvertise {
+            background-color: #ff3b30;
+        }
+
+        .btn-lootlinks {
+            background-color: #007aff;
+        }
+
+        .btn-white {
+            background-color: white;
+            color: black;
+            margin-bottom: 0;
+        }
+
+        .footer-links {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #666;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .footer-links a {
+            color: #666;
+            text-decoration: underline;
+        }
+
+        /* Success screen styles */
+        .success-icon {
+            color: #34c759;
+            font-size: 40px;
+            margin-bottom: 15px;
+        }
+
+        .key-input {
+            width: 100%;
+            padding: 18px 15px;
+            background-color: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #e0e0e0;
+            font-family: monospace;
+            font-size: 14px;
+            text-align: left;
+            margin-bottom: 20px;
+            outline: none;
+            word-break: break-all;
         }
     </style>
 </head>
+
 <body>
 
-<div class="container">
-    <h1>Tubby Key System</h1>
-    <p style="margin-bottom: 20px;">Paste your HWID below to get your Daily HWID-Locked Key!</p>
-    
-    <input type="text" id="hwidInput" class="hwid-input" placeholder="Paste HWID here (Ctrl+V)" style="width: 100%; padding: 12px; margin-bottom: 20px; box-sizing: border-box; border-radius: 6px; border: 1px solid #9B2BFF; background: #1F1332; color: white; font-size: 16px; text-align: center;">
-    
-    <button class="copy-btn" onclick="generateKey()" id="generateBtn" style="margin-bottom: 20px;">Generate Key</button>
-    
-    <div class="key-box" id="keyDisplay" style="display: none;">Your key will appear here.</div>
-    
-    <button class="copy-btn" onclick="copyKey()" id="copyBtn" style="display: none;">Copy Key</button>
-</div>
+    <div style="width: 100%; max-width: 450px; padding: 20px;">
+        <!-- Only show on main ad screen -->
+        <div class="alert-banner" id="alertBanner" style="display: none;">
+            <span>⚠️ Sharing or bypassing keys is strictly tracked and prohibited.</span>
+        </div>
 
-<script>
-    async function getDailyKey(hwid) {
-        // Matches C# string exactly
-        const date = new Date().toISOString().split('T')[0];
-        const message = hwid + date + "TubbyAdsSecret123!";
-        
-        const msgUint8 = new TextEncoder().encode(message);
-        const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-        
-        return "TUBBY-" + hashHex.substring(0, 10).toUpperCase();
-    }
+        <div class="card" id="mainCard">
+            <!-- Content injected by JS -->
+        </div>
+    </div>
 
-    // Automatically read invisible HWID from Linkvertise Dynamic Link!
-    const urlParams = new URLSearchParams(window.location.search);
-    const hiddenHwid = urlParams.get('hwid');
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const hwid = urlParams.get('hwid');
+        const action = urlParams.get('action');
 
-    if (hiddenHwid) {
-        // If HWID is in the URL, hide the manual paste stuff and do it instantly!
-        document.getElementById("hwidInput").value = hiddenHwid;
-        document.getElementById("hwidInput").style.display = "none";
-        document.getElementById("generateBtn").style.display = "none";
-        document.querySelector("p").innerText = "Ads complete! Your Daily HWID-Locked Key is generated below.";
-        
-        generateKey();
-    }
+        const mainCard = document.getElementById('mainCard');
+        const alertBanner = document.getElementById('alertBanner');
 
-    async function generateKey() {
-        const hwid = document.getElementById("hwidInput").value.trim();
-        
-        if (!hwid || hwid.length < 5) {
-            document.getElementById("keyDisplay").innerText = "Please paste a valid HWID first!";
-            document.getElementById("keyDisplay").style.color = "#FF5252";
-            document.getElementById("keyDisplay").style.display = "block";
-            return;
+        // SHA-256 Polyfill/Implementation for pure client side
+        async function getSecretHash(message) {
+            const msgUint8 = new TextEncoder().encode(message);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return hashHex;
         }
 
-        const key = await getDailyKey(hwid);
-        
-        const display = document.getElementById("keyDisplay");
-        display.innerText = key;
-        display.style.color = "#E0DCE6";
-        display.style.display = "block";
-        document.getElementById("copyBtn").style.display = "block";
-    }
+        async function init() {
+            if (action === 'generate') {
+                handleGenerateScreen();
+            } else if (hwid) {
+                handleAdScreen();
+            } else {
+                showError("Invalid URL. Please click 'Get Key' from inside the application.");
+            }
+        }
 
-    function copyKey() {
-        const key = document.getElementById("keyDisplay").innerText;
-        navigator.clipboard.writeText(key).then(() => {
-            const btn = document.getElementById("copyBtn");
+        function handleAdScreen() {
+            // Save HWID so we know it after they return from the Ad
+            localStorage.setItem('tubby_hwid', hwid);
+
+            alertBanner.style.display = 'flex';
+
+            mainCard.innerHTML = `
+            <h1>Tubby Key System</h1>
+            <div class="subtitle">Completed 0 of 1</div>
+            <p>Click an option below to complete a quick task. Ads directly support the creator!</p>
+
+            <button class="btn btn-linkvertise" onclick="goAd('linkvertise')">
+                Get via Linkvertise
+            </button>
+            <button class="btn btn-lootlinks" onclick="goAd('lootlinks')">
+                Get via Loot-Links
+            </button>
+            
+            <div class="footer-links">
+                <a href="#">Report</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Privacy Policy</a>
+            </div>
+        `;
+        }
+
+        async function handleGenerateScreen() {
+            const savedHwid = localStorage.getItem('tubby_hwid');
+            const clickTime = localStorage.getItem('tubby_ad_click');
+
+            if (!savedHwid) {
+                showError("We lost your HWID! Please restart the process from the app.");
+                return;
+            }
+
+            // 15 second basic anti-bypass
+            if (!clickTime || (Date.now() - parseInt(clickTime)) < 15000) {
+                showError("You bypassed the ad verification. Please complete the ad properly!");
+
+                // Render a retry button
+                mainCard.innerHTML += `
+                <button class="btn btn-white" onclick="window.location.href='?hwid=${savedHwid}'" style="margin-top:20px;">Try Again</button>
+            `;
+                return;
+            }
+
+            // Valid execution - Generate Key
+            const timestamp = Math.floor(Date.now() / 1000);
+            const hexTs = timestamp.toString(16).padStart(8, '0');
+
+            const message = savedHwid + timestamp.toString() + "TubbyAdsSecret123!";
+            const hashHex = await getSecretHash(message);
+
+            const finalKey = "TUBBY-" + hexTs + hashHex;
+
+            mainCard.innerHTML = `
+            <div class="success-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+            </div>
+            <h1>Successfully whitelisted!</h1>
+            <p style="margin-bottom: 20px;">Please return to the application for access, your key is valid for exactly 4 hours.</p>
+
+            <input type="text" class="key-input" id="generatedKey" value="${finalKey}" readonly>
+
+            <button class="btn btn-white" id="copyBtn" onclick="copyFinalKey()">
+                Copy Key
+            </button>
+            
+            <div class="footer-links">
+                <a href="#">Report</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Privacy Policy</a>
+            </div>
+        `;
+        }
+
+        function goAd(provider) {
+            // Record click time for anti-bypass
+            localStorage.setItem('tubby_ad_click', Date.now().toString());
+
+            // Replace these URLs with the actual ad links that redirect to ?action=generate
+            let targetUrl = "?action=generate";
+
+            if (provider === 'linkvertise') {
+                // e.g., https://linkvertise.com/4393248/tubby-key?o=sharing
+                // MAKE SURE YOUR AD LINK DESTINATION IS EXACTLY: 
+                // https://tubby12345.github.io/Key-System/?action=generate
+                targetUrl = "https://linkvertise.com/4393248/tubby-key?o=sharing";
+            } else if (provider === 'lootlinks') {
+                // e.g., https://loot-link.com/s?4OrO7UP4
+                targetUrl = "https://loot-link.com/s?4OrO7UP4";
+            }
+
+            // Simulate going to ad
+            window.location.href = targetUrl;
+        }
+
+        function copyFinalKey() {
+            const keyInput = document.getElementById('generatedKey');
+            keyInput.select();
+            document.execCommand("copy");
+
+            const btn = document.getElementById('copyBtn');
             btn.innerText = "Copied!";
-            btn.style.backgroundColor = "#4CAF50";
+            btn.style.backgroundColor = "#34c759";
+            btn.style.color = "white";
+
             setTimeout(() => {
                 btn.innerText = "Copy Key";
-                btn.style.backgroundColor = "#9B2BFF";
+                btn.style.backgroundColor = "white";
+                btn.style.color = "black";
             }, 2000);
-        });
-    }
-</script>
+        }
 
+        function showError(msg) {
+            mainCard.innerHTML = `
+            <div class="success-icon" style="color:#ff3b30;">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+            </div>
+            <h1 style="color:#ff3b30;">Error!</h1>
+            <p>${msg}</p>
+        `;
+        }
+
+        // Run
+        init();
+    </script>
 </body>
+
 </html>
