@@ -90,8 +90,9 @@
 
         /* BUTTONS */
         .btn {
-            display: flex;
+            display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 8px;
             padding: 10px 18px;
             border-radius: var(--radius-md);
@@ -102,6 +103,7 @@
             transition: all 0.2s ease;
             color: white;
             outline: none;
+            background: transparent;
         }
         
         .btn:active { transform: scale(0.96); }
@@ -170,7 +172,7 @@
             gap: 10px;
         }
 
-        .input-box {
+        .input-box, select {
             background: rgba(0, 0, 0, 0.3);
             border: 1px solid var(--border-color);
             padding: 12px 16px;
@@ -179,9 +181,19 @@
             font-size: 14px;
             outline: none;
             transition: border 0.2s;
-            width: 300px;
+            width: 100%;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
         }
-        .input-box:focus { border-color: var(--primary); }
+        select {
+            cursor: pointer;
+            background-image: url('data:image/svg+xml;utf8,<svg fill="white" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+            background-repeat: no-repeat;
+            background-position-x: 95%;
+            background-position-y: 50%;
+        }
+        .input-box:focus, select:focus { border-color: var(--primary); }
 
         /* TABLE STYLES */
         .table-container {
@@ -242,6 +254,62 @@
             gap: 8px;
             justify-content: flex-end;
         }
+
+        /* MODALS */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .modal-overlay.open {
+            display: flex;
+            opacity: 1;
+        }
+        .modal {
+            background: #18181b;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+            transform: scale(0.95);
+            transition: transform 0.2s;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+        .modal-overlay.open .modal { transform: scale(1); }
+        .modal h2 { margin-bottom: 20px; font-size: 20px; }
+        
+        .form-group { margin-bottom: 20px; }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+        .form-row .form-group { flex: 1; }
+        
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
     </style>
 </head>
 <body>
@@ -272,9 +340,8 @@
         <!-- KEYS TAB -->
         <div class="card active" id="view-keys">
             <div class="toolbar">
-                <div style="display:flex; gap: 10px;">
-                    <input type="text" id="newKeyInput" class="input-box" placeholder="Custom Key Name (e.g. TUBBY-VIP-1)">
-                    <button class="btn btn-primary" onclick="createCustomKey()">Create Lifetime License</button>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="openCreateModal()">Create New License</button>
                 </div>
                 <span style="color: var(--text-muted); font-size: 14px;">Total: <strong id="totalKeys" style="color:white">0</strong></span>
             </div>
@@ -301,7 +368,7 @@
         <!-- BANS TAB -->
         <div class="card" id="view-bans">
             <div class="toolbar">
-                <div style="display:flex; gap: 10px;">
+                <div style="display:flex; gap: 10px; width: 60%;">
                     <input type="text" id="newBanInput" class="input-box" placeholder="Paste HWID to ban...">
                     <button class="btn btn-danger" onclick="banHardware()">Ban Hardware</button>
                 </div>
@@ -326,6 +393,64 @@
 
     </div>
 
+    <!-- CREATE LICENSE MODAL -->
+    <div class="modal-overlay" id="createModal">
+        <div class="modal">
+            <h2>Create a new license</h2>
+            <div class="form-group">
+                <label>License Mask (Use * for random uppercase letter/number)</label>
+                <input type="text" id="maskInput" class="input-box" value="TUBBY-******-******-******">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Expiry Unit</label>
+                    <select id="unitInput">
+                        <option value="Hours">Hours</option>
+                        <option value="Days" selected>Days</option>
+                        <option value="Weeks">Weeks</option>
+                        <option value="Months">Months</option>
+                        <option value="Lifetime">Lifetime (Never Expires)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Expiry Duration</label>
+                    <input type="number" id="durationInput" class="input-box" value="1" min="1">
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeModals()">Cancel</button>
+                <button class="btn btn-primary" onclick="generateKeyFromModal()">Create License</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- EXTEND MODAL -->
+    <div class="modal-overlay" id="extendModal">
+        <div class="modal">
+            <h2>Extend License(s)</h2>
+            <p id="extendTargetText" style="margin-bottom:20px; font-family:monospace; color:var(--text-muted)"></p>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Unit of time to add</label>
+                    <select id="extUnitInput">
+                        <option value="Hours">Hours</option>
+                        <option value="Days" selected>Days</option>
+                        <option value="Weeks">Weeks</option>
+                        <option value="Months">Months</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Duration of time to add</label>
+                    <input type="number" id="extDurationInput" class="input-box" value="1" min="1">
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeModals()">Cancel</button>
+                <button class="btn btn-primary" onclick="submitExtendModal()">Extend Unused License(s)</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Init Icons
         lucide.createIcons();
@@ -335,6 +460,8 @@
 
         let dbKeys = {};
         let dbBans = {};
+        let currentExtendingKey = null;
+        let currentExtendingExpiry = 0;
 
         // Run on load
         fetchData();
@@ -352,7 +479,7 @@
         async function fetchData() {
             try {
                 const icon = document.querySelector('header .lucide-refresh-cw');
-                if(icon) icon.style.transform = "rotate(180deg)"; // tiny spin anim trigger
+                if(icon) icon.style.transform = "rotate(180deg)"; 
                 
                 const [keysRes, bansRes] = await Promise.all([
                     fetch(`${DB_URL}/keys.json`),
@@ -367,8 +494,95 @@
 
                 if(icon) setTimeout(() => icon.style.transform = "", 300);
             } catch (err) {
-                alert("Error connecting to Firebase: " + err.message);
+                console.error("Firebase fetch error", err);
             }
+        }
+
+        // ================= MODAL LOGIC ================= //
+        function openCreateModal() {
+            document.getElementById('createModal').classList.add('open');
+            document.getElementById('unitInput').onchange = (e) => {
+                document.getElementById('durationInput').disabled = (e.target.value === 'Lifetime');
+            };
+        }
+        function openExtendModal(keyName, currentExpiry) {
+            currentExtendingKey = keyName;
+            currentExtendingExpiry = currentExpiry;
+            document.getElementById('extendTargetText').innerText = "Target: " + keyName;
+            document.getElementById('extendModal').classList.add('open');
+        }
+        function closeModals() {
+            document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('open'));
+        }
+
+        function generateRandomMask(mask) {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let res = '';
+            for(let i=0; i<mask.length; i++) {
+                if(mask[i] === '*') res += chars.charAt(Math.floor(Math.random() * chars.length));
+                else res += mask[i];
+            }
+            return res;
+        }
+
+        function getSecondsFromUnitAndDuration(unit, duration) {
+            const d = parseInt(duration);
+            if(isNaN(d)) return 0;
+            switch(unit) {
+                case 'Hours': return d * 3600;
+                case 'Days': return d * 86400;
+                case 'Weeks': return d * 604800;
+                case 'Months': return d * 2592000;
+                default: return 0;
+            }
+        }
+
+        async function generateKeyFromModal() {
+            const mask = document.getElementById('maskInput').value;
+            const unit = document.getElementById('unitInput').value;
+            const duration = document.getElementById('durationInput').value;
+
+            const keyName = generateRandomMask(mask);
+            
+            let expiresAt = 0;
+            let type = "Lifetime";
+            if (unit !== 'Lifetime') {
+                type = "Premium";
+                expiresAt = Math.floor(Date.now() / 1000) + getSecondsFromUnitAndDuration(unit, duration);
+            }
+
+            const payload = {
+                type: type,
+                hwid: "Any",
+                createdAt: Math.floor(Date.now() / 1000),
+                expiresAt: expiresAt,
+                lastLogin: 0
+            };
+
+            await fetch(`${DB_URL}/keys/${keyName}.json`, {
+                method: 'PUT',
+                body: JSON.stringify(payload)
+            });
+
+            closeModals();
+            fetchData();
+        }
+
+        async function submitExtendModal() {
+            if(!currentExtendingKey) return;
+            const unit = document.getElementById('extUnitInput').value;
+            const duration = document.getElementById('extDurationInput').value;
+
+            const additionalSeconds = getSecondsFromUnitAndDuration(unit, duration);
+            const newExpiry = currentExtendingExpiry + additionalSeconds;
+
+            await fetch(`${DB_URL}/keys/${currentExtendingKey}.json`, {
+                method: 'PATCH',
+                body: JSON.stringify({ expiresAt: newExpiry })
+            });
+
+            closeModals();
+            fetchData();
         }
 
         // ================= KEYS MANANGEMENT ================= //
@@ -385,19 +599,18 @@
             let count = 0;
             const now = Math.floor(Date.now() / 1000);
 
-            // Sort so newest are top
             const entries = Object.entries(dbKeys).sort((a,b) => (b[1].createdAt || 0) - (a[1].createdAt || 0));
 
             for(const [keyName, data] of entries) {
                 count++;
                 
-                let isLifetime = data.type === 'Lifetime';
+                let isLifetime = data.expiresAt === 0 || data.type === 'Lifetime';
                 let isExpired = !isLifetime && data.expiresAt > 0 && data.expiresAt < now;
                 
                 let statusHtml = "";
                 if (isLifetime) statusHtml = `<div class="status-badge status-lifetime"><i data-lucide="award" style="width:12px;height:12px"></i> Lifetime</div>`;
                 else if (isExpired) statusHtml = `<div class="status-badge status-expired"><i data-lucide="clock" style="width:12px;height:12px"></i> Expired</div>`;
-                else statusHtml = `<div class="status-badge status-active"><i data-lucide="check-circle-2" style="width:12px;height:12px"></i> Active (4h)</div>`;
+                else statusHtml = `<div class="status-badge status-active"><i data-lucide="check-circle-2" style="width:12px;height:12px"></i> Active (${data.type})</div>`;
 
                 tbody.innerHTML += `
                     <tr class="row-hover">
@@ -408,8 +621,8 @@
                         <td>${isLifetime ? '∞' : formatTime(data.expiresAt)}</td>
                         <td>${formatTime(data.lastLogin)}</td>
                         <td class="action-cell">
-                            ${(!isLifetime && !isExpired) ? `
-                                <button class="btn btn-outline" style="padding: 6px 12px; font-size:12px;" onclick="extendKey('${keyName}', ${data.expiresAt})" title="Add 2 Hours">
+                            ${(!isLifetime) ? `
+                                <button class="btn btn-outline" style="padding: 6px 12px; font-size:12px;" onclick="openExtendModal('${keyName}', ${data.expiresAt})" title="Extend">
                                     <i data-lucide="clock-4" style="width: 14px; height: 14px;"></i> Extend
                                 </button>
                             ` : ''}
@@ -425,43 +638,11 @@
             lucide.createIcons();
         }
 
-        async function createCustomKey() {
-            const input = document.getElementById('newKeyInput');
-            const keyName = input.value.trim();
-            if(!keyName) return;
-
-            const payload = {
-                type: "Lifetime",
-                hwid: "Any",
-                createdAt: Math.floor(Date.now() / 1000),
-                expiresAt: 0,
-                lastLogin: 0
-            };
-
-            await fetch(`${DB_URL}/keys/${keyName}.json`, {
-                method: 'PUT',
-                body: JSON.stringify(payload)
-            });
-
-            input.value = "";
-            fetchData();
-        }
-
         async function deleteKey(keyName) {
             if(confirm(`Are you sure you want to delete ${keyName}? They will be logged out eventually.`)) {
                 await fetch(`${DB_URL}/keys/${keyName}.json`, { method: 'DELETE' });
                 fetchData();
             }
-        }
-
-        async function extendKey(keyName, currentExpiry) {
-            const additionalSeconds = 7200; // 2 hours
-            const newExpiry = currentExpiry + additionalSeconds;
-            await fetch(`${DB_URL}/keys/${keyName}.json`, {
-                method: 'PATCH',
-                body: JSON.stringify({ expiresAt: newExpiry })
-            });
-            fetchData();
         }
 
         // ================= BANS MANANGEMENT ================= //
@@ -471,7 +652,6 @@
             tbody.innerHTML = "";
             let count = 0;
 
-            // Sort
             const entries = Object.entries(dbBans).sort((a,b) => (b[1].timestamp || 0) - (a[1].timestamp || 0));
 
             for(const [hwid, data] of entries) {
