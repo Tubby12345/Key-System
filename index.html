@@ -175,7 +175,12 @@
         }
 
         async function init() {
+            const clickTime = localStorage.getItem('tubby_ad_click');
+            const savedHwid = localStorage.getItem('tubby_hwid');
+
             if (action === 'generate') {
+                handleGenerateScreen();
+            } else if (clickTime && savedHwid && (Date.now() - parseInt(clickTime)) > 15000) {
                 handleGenerateScreen();
             } else if (hwid) {
                 handleAdScreen();
@@ -231,6 +236,8 @@
             }
 
             // Valid execution - Generate Key
+            localStorage.removeItem('tubby_ad_click'); // Clear click time so they can't just refresh for a new free key
+            
             const timestamp = Math.floor(Date.now() / 1000);
             const hexTs = timestamp.toString(16).padStart(8, '0');
 
@@ -271,10 +278,10 @@
             let targetUrl = "?action=generate";
 
             if (provider === 'linkvertise') {
-                // e.g., https://linkvertise.com/4393248/tubby-key?o=sharing
+                // e.g., https://link-hub.net/4393248/9KabSxh8k7AV
                 // MAKE SURE YOUR AD LINK DESTINATION IS EXACTLY: 
                 // https://tubby12345.github.io/Key-System/?action=generate
-                targetUrl = "https://link-center.net/4393248/uhxRsr09RZuA";
+                targetUrl = "https://link-hub.net/4393248/9KabSxh8k7AV";
             } else if (provider === 'lootlinks') {
                 // e.g., https://loot-link.com/s?4OrO7UP4
                 targetUrl = "https://loot-link.com/s?4OrO7UP4";
